@@ -820,6 +820,48 @@ accepts('<a href="/wiki/itemprop=demo">microdata demo</a>', 'benign itemprop sub
 accepts('<span class=x/itemprop-demo>itemprop class example</span>', 'benign itemprop substring in class value');
 accepts('<div class="itemscope">plain div</div>', 'benign itemscope as a class value');
 
+// aria-busy= fakes a loading/updating region for assistive technology — same
+// family as merged #578 (microdata), #571 (aria-owns), and #568 (aria-current).
+// <meter>/<progress> elements are already blocked; aria-busy is the remaining
+// status-spoof attribute path for static glossary prose.
+rejects('Intro.\n\n<div aria-busy="true">Still syncing wallet data…</div>', 'plain aria-busy attribute');
+rejects('Intro.\n\n<a href="https://evil.example/" aria-busy="true">Continue</a>', 'plain aria-busy on anchor');
+rejects('Intro.\n\n<  div   aria-busy = "true">x</div>', 'spaced aria-busy attribute');
+rejects('<a href="x"aria-busy="true">go</a>', 'quote-abutted aria-busy attribute');
+rejects('<p class=x/aria-busy="true">x</p>', 'slash-delimited aria-busy attribute');
+
+accepts('<a href="/wiki/aria-busy=demo">aria-busy docs</a>', 'benign aria-busy substring in quoted href');
+accepts('ARIA busy state is an accessibility concept described here only as prose.', 'benign aria-busy prose');
+
+// aria-pressed=/aria-checked=/aria-selected= fake toggle and option state —
+// same family as merged #582 (aria-busy), #568 (aria-current), and #559
+// (aria-expanded).
+rejects('Intro.\n\n<a href="https://evil.example/" aria-pressed="true">Continue</a>', 'plain aria-pressed attribute on anchor');
+rejects('Intro.\n\n<li aria-selected="true">Step 1</li>', 'plain aria-selected attribute on list item');
+rejects('Intro.\n\n<div aria-checked="mixed">50% verified</div>', 'plain aria-checked attribute');
+rejects('Intro.\n\n<  a   href="/wiki/stake/"   aria-pressed = "true">stake</a>', 'spaced aria-pressed attribute');
+rejects('<a href="x"aria-pressed="true">go</a>', 'quote-abutted aria-pressed attribute');
+rejects('<li class=x/aria-selected="true">x</li>', 'slash-delimited aria-selected attribute');
+rejects("<p class='x'aria-checked='mixed'>x</p>", 'single-quote-abutted aria-checked attribute');
+
+accepts('<a href="/wiki/aria-pressed=demo">aria-pressed docs</a>', 'benign aria-pressed substring in quoted href');
+accepts('ARIA pressed state is an accessibility concept described here only as prose.', 'benign aria-pressed prose');
+accepts('<span class=x/aria-selected-demo>not an aria-selected attribute</span>', 'benign aria-selected substring in class value');
+
+// aria-disabled=/aria-readonly=/aria-required= fake form-widget state —
+// same family as merged #583 (toggle state), #570 (aria-errormessage), and inert.
+rejects('Intro.\n\n<a href="https://evil.example/" aria-disabled="true">Verify wallet</a>', 'plain aria-disabled attribute on anchor');
+rejects('Intro.\n\n<div aria-required="true">Enter seed phrase</div>', 'plain aria-required attribute');
+rejects('Intro.\n\n<div aria-readonly="true">Paste seed phrase here</div>', 'plain aria-readonly attribute');
+rejects('Intro.\n\n<  a   href="/wiki/stake/"   aria-disabled = "true">stake</a>', 'spaced aria-disabled attribute');
+rejects('<a href="x"aria-disabled="true">go</a>', 'quote-abutted aria-disabled attribute');
+rejects('<div class=x/aria-required="true">x</div>', 'slash-delimited aria-required attribute');
+rejects("<p class='x'aria-readonly='true'>x</p>", 'single-quote-abutted aria-readonly attribute');
+
+accepts('<a href="/wiki/aria-disabled=demo">aria-disabled docs</a>', 'benign aria-disabled substring in quoted href');
+accepts('ARIA disabled state is an accessibility concept described here only as prose.', 'benign aria-disabled prose');
+accepts('<span class=x/aria-required-demo>not an aria-required attribute</span>', 'benign aria-required substring in class value');
+
 // srcset=/sizes= on <img> steer responsive loading — gap after #411 blocked picture/source.
 rejects('Intro.\n\n<img src="/wiki/fig.png" srcset="https://evil.example/x 1x" alt="x">', 'plain img srcset attribute');
 rejects('Intro.\n\n<  img   src="/wiki/fig.png"   srcset = "https://evil.example/x 2x">', 'spaced img srcset attribute');

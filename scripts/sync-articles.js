@@ -519,6 +519,37 @@ const microdataAttrPattern = /<[^>]*\s(?:itemscope|itemtype|itemprop|itemref|ite
 const nonSpaceDelimitedMicrodataAttrPattern = /<[^>]*[/"'`](?:itemtype|itemprop|itemref|itemid)\s*=/i;
 const quoteAbuttedItemscopePattern = /<[^>]*["'`]itemscope(?=[\s>/=])/i;
 
+// aria-busy= marks a region as updating in assistive technology — e.g.
+// aria-busy="true" makes screen readers announce "loading" for injected prose
+// even though glossary articles are static HTML with no live update channel.
+// <meter>/<progress> are already element-blocked (#156); aria-busy is the
+// remaining status-spoof path for AT users. Same accessibility-attribute
+// family as merged #578 (microdata), #571 (aria-owns), and #568 (aria-current).
+const ariaBusyAttrPattern = /<[^>]*\saria-busy\s*=/i;
+const nonSpaceDelimitedAriaBusyAttrPattern = /<[^>]*[/"'`](?:aria-busy)\s*=/i;
+
+// aria-pressed=/aria-checked=/aria-selected= fake toggle and option state in
+// assistive technology — e.g. aria-pressed="true" makes a link sound pressed,
+// aria-selected="true" marks a list item as the chosen procedure step, and
+// aria-checked="mixed" reports a fake partial-verification indicator. Same
+// accessibility-state spoof family as merged #582 (aria-busy), #568
+// (aria-current), and #559 (aria-expanded). Glossary articles never set widget
+// toggle or selection state — the site layout handles that in its own components.
+const ariaToggleStateAttrPattern = /<[^>]*\saria-(?:pressed|checked|selected)\s*=/i;
+const nonSpaceDelimitedAriaToggleStateAttrPattern =
+  /<[^>]*[/"'`](?:aria-(?:pressed|checked|selected))\s*=/i;
+
+// aria-disabled=/aria-readonly=/aria-required= fake form-widget state in
+// assistive technology — e.g. aria-disabled="true" makes a link sound inactive
+// while it remains navigable, aria-required="true" announces a fake mandatory
+// field, and aria-readonly="true" marks prose as an uneditable control. Same
+// accessibility-state spoof family as merged #583 (toggle state), #582
+// (aria-busy), #570 (aria-errormessage), and inert (#496). Glossary articles
+// never emit form-field ARIA on static prose.
+const ariaFormStateAttrPattern = /<[^>]*\saria-(?:disabled|readonly|required)\s*=/i;
+const nonSpaceDelimitedAriaFormStateAttrPattern =
+  /<[^>]*[/"'`](?:aria-(?:disabled|readonly|required))\s*=/i;
+
 // nowrap on allowed <td>/<th> disables text wrapping in the cell — an injected
 // long URL, fake wallet address, or padded phishing line breaks out of the
 // column, reflowing the real article text off-screen (a layout-defacement /
@@ -1118,6 +1149,33 @@ export function validateArticleContent(slug, content) {
   ) {
     throw new Error(
       `Unsafe article content in "${slug}": itemscope, itemtype, itemprop, itemref, and itemid microdata attributes are not allowed in article content`,
+    );
+  }
+
+  if (
+    ariaBusyAttrPattern.test(emptiedAttributeContent)
+    || nonSpaceDelimitedAriaBusyAttrPattern.test(emptiedAttributeContent)
+  ) {
+    throw new Error(
+      `Unsafe article content in "${slug}": aria-busy attributes are not allowed in article content`,
+    );
+  }
+
+  if (
+    ariaToggleStateAttrPattern.test(emptiedAttributeContent)
+    || nonSpaceDelimitedAriaToggleStateAttrPattern.test(emptiedAttributeContent)
+  ) {
+    throw new Error(
+      `Unsafe article content in "${slug}": aria-pressed, aria-checked, and aria-selected attributes are not allowed in article content`,
+    );
+  }
+
+  if (
+    ariaFormStateAttrPattern.test(emptiedAttributeContent)
+    || nonSpaceDelimitedAriaFormStateAttrPattern.test(emptiedAttributeContent)
+  ) {
+    throw new Error(
+      `Unsafe article content in "${slug}": aria-disabled, aria-readonly, and aria-required attributes are not allowed in article content`,
     );
   }
 
